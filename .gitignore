@@ -2,4 +2,5 @@
 .DS_Store?
 ._*
 .streamlit
+.env
 __pycache__

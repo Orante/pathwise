@@ -1,7 +1,8 @@
 from openai import OpenAI
 from pathlib import Path
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Literal
+from datetime import date
 
 # List of all tools
 FUNCTION_CALLINGS = [
@@ -22,14 +23,14 @@ FUNCTION_CALLINGS = [
 # List of all classes
 class Goal(BaseModel):
     name: str
-    target_amount: Optional[float] = None
+    target_amount: float
     current_savings: Optional[float] = 0.0   # Progress toward goal
-    deadline: Optional[str] = None           # YYYY-MM
+    deadline: date
     monthly_saving_required: Optional[float] = None
     status: Optional[str] = None             # e.g., "on track", "delayed"
     created_at: Optional[str] = None         # YYYY-MM-DD
     last_updated: Optional[str] = None       # YYYY-MM-DD
-    concise_additional_notes: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class LifeEvent(BaseModel):

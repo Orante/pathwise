@@ -1,6 +1,5 @@
 # pathfinder.py
 
-from dotenv import load_dotenv, find_dotenv
 import json
 from openai import OpenAI
 from pathlib import Path

@@ -73,9 +73,8 @@ def get_ai_response(messages,system_instructions, model):
         instructions=system_instructions,
         tools = TOOLS,
     )
-    print(f"{response.output}")
     print("\n\n\n")
-    print(response)
+    print(f"{json.dumps(response.to_dict(), indent=2)}")
     print("\n\n\n")
 
     while True:
@@ -142,4 +141,7 @@ if user_input:
         
     # Add AI response to chat history
     st.session_state.messages.append({"role": "assistant", "content": output})
-    print(st.session_state.messages)
+    
+    # Print the results
+    for msg in st.session_state.messages:
+        print(f"{msg['role']}: \n {msg['content']}\n")

@@ -1,6 +1,6 @@
+.env
 .DS_Store
 .DS_Store?
 ._*
 .streamlit
-.env
 __pycache__

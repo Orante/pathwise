@@ -22,28 +22,9 @@ class SavingPlan(BaseModel):
     interest_rate: Optional[float] = 0.0
     interest_frequency: Optional[Literal["daily", "bi-monthly", "monthly", "quarterly", "semi-annually", "annually"]] = None
 
-class Goal(BaseModel):
-    name: str
-    total_target_amount: float
-    deadline: date
-    saving_plan: List[SavingPlan] = Field(default_factory=list)
-    status: Literal["On Track","Delayed"]
-    flexibility: Literal["Adjustable","Firm"]
-    priority: Literal["High","Medium","Low"]
-    created_at: date = Field(frozen = True, default_factory=date.today)         
-    notes: str = Field(default=None, max_length=100, description="Additional notes about the goal that are not otherwise captured in the other fields.")
-
-    @computed_field
-    @property
-    def current_balance(self) -> float:
-        curr_balance = 0
-        for plan in self.saving_plan:
-            curr_balance += plan.balance
-        return curr_balance
-
 # Set page config
 st.set_page_config(
-    page_title="Goal Setting Advisor",
+    page_title="Explore Path Advisor",
     page_icon="🤖",
     layout="centered"
 )

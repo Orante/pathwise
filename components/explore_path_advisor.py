@@ -12,7 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from src.config import USER_DIR
-from src.json_utils import load_user_file
+from src.json_utils import load_user_file, Timeline
 
 # Set page config
 st.set_page_config(
@@ -50,7 +50,9 @@ with st.sidebar:
 
     # Clear chat button in sidebar
     if st.button("🗑️ Clear Chat"):
-        st.session_state.messages = [{"role": "system", "content": f"Here is the user's information: {user_data}"}]
+        st.session_state.explore_paths_messages = [{"role": "system", "content": f"Today's Date: {date.today()}."},
+                                               {"role": "system", "content": f"Here is the user's information: {json.dumps(user_data)}"}]
+
         st.rerun()
 
 if "explore_paths_messages" not in st.session_state:
@@ -62,7 +64,7 @@ if st.button("Generate Future Paths"):
     client = OpenAI(api_key=API_KEY)
 
     for col in st.columns(3):
-        response = client.responses.create(
+        response = client.responses.parse(
             model=model,
             input=st.session_state.explore_paths_messages,
             instructions=
@@ -70,7 +72,7 @@ if st.button("Generate Future Paths"):
             ### Role
             You are an expert financial advisor specializing in creating personalized financial plans that help users achieve their goals.
             ### Task
-            Develop a distinct future financial paths for the user based on their profile and goals. Each should include a detailed saving plan.
+            Develop a distinct future financial paths for the user based on their profile and goals. Each should have a concise, creative, and descriptive title and a detailed saving plan.
             ### Context
             The currency is in Philippine pesos, unless stated otherwise.
             """,
@@ -78,6 +80,9 @@ if st.button("Generate Future Paths"):
                 "type": "code_interpreter",
                 "container": {"type": "auto"}
             }],
+            text_format=Timeline
         )
-        st.session_state.explore_paths_messages.append({"role": "assistant", "content": response.output_text})
-        col.write(response.output_text)
+
+        st.session_state.explore_paths_messages.append({"role": "assistant", "content": response.output_parsed.model_dump_json()})
+        print(st.session_state.explore_paths_messages)  
+        col.write(response.output_parsed.model_dump_json(indent = 2))

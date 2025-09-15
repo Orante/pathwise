@@ -13,6 +13,8 @@ class SavingPlan(BaseModel):
     balance: Optional[float] = 0.0
     start_date: date
     end_date: date
+    saving_frequency: Literal["daily", "bi-monthly", "monthly", "quarterly", "semi-annually", "annually"]
+    saving_amount_per_period: float
     interest_rate: Optional[float] = 0.0
     interest_frequency: Optional[Literal["daily", "bi-monthly", "monthly", "quarterly", "semi-annually", "annually"]] = None
 
@@ -36,7 +38,7 @@ class Goal(BaseModel):
         return curr_balance
 
 class Timeline(BaseModel):
-    name: str
+    title: str = Field(description="Title of the timeline, e.g., 'Balanced Voyager', 'Risk Taker', 'Baby First'")
     goals: List[Goal] = Field(default_factory=list)
     timeline_risk: Literal["Healthy", "Tight", "Critical"]
     resource_gaps: str = Field(default=None, max_length=100)

@@ -62,7 +62,7 @@ if st.button("Generate Future Paths"):
     client = OpenAI(api_key=API_KEY)
 
     for col in st.columns(3):
-        response = client.responses.parse(
+        response = client.responses.create(
             model=model,
             input=st.session_state.explore_paths_messages,
             instructions=

@@ -27,6 +27,32 @@
             "created_at": "2025-09-16",
             "notes": "Save PHP 100,000 by next year for expenses related to having a baby.",
             "current_balance": 0.0
+        },
+        {
+            "id": "70f6055e-77a7-4b42-a438-4b4e32824d9f",
+            "name": "Save a house",
+            "total_target_amount": 5000000.0,
+            "deadline": "2030-09-16",
+            "saving_plan": [],
+            "status": "On Track",
+            "flexibility": "Adjustable",
+            "priority": "High",
+            "created_at": "2025-09-16",
+            "notes": "Flexible savings goal for purchasing a house in 5 years.",
+            "current_balance": 0.0
+        },
+        {
+            "id": "f4289075-8e79-4319-b877-26a371d5627f",
+            "name": "Emergency Fund",
+            "total_target_amount": 120000.0,
+            "deadline": "2026-09-16",
+            "saving_plan": [],
+            "status": "On Track",
+            "flexibility": "Adjustable",
+            "priority": "High",
+            "created_at": "2023-10-05",
+            "notes": "",
+            "current_balance": 0.0
         }
     ]
 }

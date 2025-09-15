@@ -12,34 +12,7 @@ sys.path.append(str(ROOT_DIR))
 
 from src.config import USER_DIR
 from src.json_utils import add_goal
-
-# List of all classes in this file:
-class SavingPlan(BaseModel):
-    target_amount: float
-    balance: Optional[float] = 0.0
-    start_date: date
-    end_date: date
-    interest_rate: Optional[float] = 0.0
-    interest_frequency: Optional[Literal["daily", "bi-monthly", "monthly", "quarterly", "semi-annually", "annually"]] = None
-
-class Goal(BaseModel):
-    name: str
-    total_target_amount: float
-    deadline: date
-    saving_plan: List[SavingPlan] = Field(default_factory=list)
-    status: Literal["On Track","Delayed"]
-    flexibility: Literal["Adjustable","Firm"]
-    priority: Literal["High","Medium","Low"]
-    created_at: date = Field(frozen = True, default_factory=date.today)         
-    notes: str = Field(default=None, max_length=100, description="Additional notes about the goal that are not otherwise captured in the other fields.")
-
-    @computed_field
-    @property
-    def current_balance(self) -> float:
-        curr_balance = 0
-        for plan in self.saving_plan:
-            curr_balance += plan.balance
-        return curr_balance
+from src.json_utils import Goal, SavingPlan
 
 # Set page config
 st.set_page_config(
@@ -47,14 +20,6 @@ st.set_page_config(
     page_icon="🤖",
     layout="centered"
 )
-
-def load_user_data(user):
-    file_path = USER_DIR / f"{user}.json"
-    try:
-        with open(file_path, "r") as f:
-            return f.read()
-    except:
-        return {}
 
 # Title
 st.title("Goal Setting Advisor")
@@ -71,7 +36,7 @@ with st.sidebar:
     
     model = st.selectbox(
         "Select Model:",
-        ["gpt-4.1-mini-2025-04-14","gpt-5-mini", "gpt-5", "gpt-5-nano"],
+        ["gpt-4.1-mini-2025-04-14"],
         index=0
     )
     
@@ -83,17 +48,17 @@ with st.sidebar:
 
     # Clear chat button in sidebar
     if st.button("🗑️ Clear Chat"):
-        st.session_state.messages = [{"role": "system", "content": f"Today's Date: {date.today()}. Here is the user's information: {load_user_data(user)}"},
+        st.session_state.goal_messages = [{"role": "system", "content": f"Today's Date: {date.today()}."},
                                      {"role": "assistant", "content": "What goal do you have in mind?"}]
         st.rerun()
     
-# Initialize session state for messages and response_id
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": f"Today's Date: {date.today()}. Here is the user's information: {load_user_data(user)}"},
+# Initialize session state for goal_messages and response_id
+if "goal_messages" not in st.session_state:
+    st.session_state.goal_messages = [{"role": "system", "content": f"Today's Date: {date.today()}."},
                                      {"role": "assistant", "content": "What goal do you have in mind?"}]
 
 # Display chat messages
-for message in st.session_state.messages:
+for message in st.session_state.goal_messages:
     if message["role"] == "system":
         continue
     with st.chat_message(message["role"]):
@@ -105,7 +70,7 @@ user_input = st.chat_input("Type your message here...")
 # Handle user input and generate response
 if user_input:
     # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.goal_messages.append({"role": "user", "content": user_input})
     
     # Display user message
     with st.chat_message("user"):
@@ -118,7 +83,7 @@ if user_input:
             client = OpenAI(api_key = API_KEY)
             response = client.responses.create(
                 model=model,
-                input=st.session_state.messages,
+                input=st.session_state.goal_messages,
                 instructions= """
                                ### Role
                                You are Finario, a friendly and professional financial advisor.
@@ -143,12 +108,12 @@ if user_input:
             )
 
             # Add AI response to chat history
-            st.session_state.messages.append({"role": "assistant", "content": response.output_text})
+            st.session_state.goal_messages.append({"role": "assistant", "content": response.output_text})
 
             # Show the goal new information
             st.session_state.new_goal_info = client.responses.parse(
                 model="gpt-4.1-nano-2025-04-14",
-                input=st.session_state.messages,
+                input=st.session_state.goal_messages,
                 instructions="""
                                 Save the user's goal as a Goal class in JSON format.
                                 If the input is incompatible with certain fields, set those fields to None or empty list as appropriate.

@@ -5,10 +5,10 @@ import json
 import uuid
 import base64
 from src.config import DATA_DIR
-import time
 
 # List of all classes in this file:
 class SavingPlan(BaseModel):
+    """A plan to save towards a specific goal."""
     target_amount: float
     balance: Optional[float] = 0.0
     start_date: date
@@ -20,7 +20,7 @@ class Goal(BaseModel):
     name: str
     total_target_amount: float
     deadline: date
-    saving_plan: List[SavingPlan] = Field(default_factory=list)
+    saving_plan: List[SavingPlan] = Field(default_factory=list, description="A list of saving plans to achieve this goal. For example, you might have one plan to have 10000 monthly savings for the next 6 months, and another plan to have 5000 monthly savings for the following year.") 
     status: Literal["On Track","Delayed"]
     flexibility: Literal["Adjustable","Firm"]
     priority: Literal["High","Medium","Low"]
@@ -34,6 +34,16 @@ class Goal(BaseModel):
         for plan in self.saving_plan:
             curr_balance += plan.balance
         return curr_balance
+
+class Timeline(BaseModel):
+    name: str
+    goals: List[Goal] = Field(default_factory=list)
+    timeline_risk: Literal["Healthy", "Tight", "Critical"]
+    resource_gaps: str = Field(default=None, max_length=100)
+    assumptions: List[str] = Field(default_factory=list)
+
+class TimelineOptions(BaseModel):
+    timelines: List[Timeline] = Field(min_length=3, max_length=3)
     
 # Utility functions for user data management
 

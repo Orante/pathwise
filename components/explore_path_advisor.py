@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 from pydantic import BaseModel, Field, computed_field
 from typing import List, Optional, Literal
+import json
 
 import streamlit as st
 
@@ -11,16 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from src.config import USER_DIR
-from src.json_utils import add_goal
-
-# List of all classes in this file:
-class SavingPlan(BaseModel):
-    target_amount: float
-    balance: Optional[float] = 0.0
-    start_date: date
-    end_date: date
-    interest_rate: Optional[float] = 0.0
-    interest_frequency: Optional[Literal["daily", "bi-monthly", "monthly", "quarterly", "semi-annually", "annually"]] = None
+from src.json_utils import load_user_file
 
 # Set page config
 st.set_page_config(
@@ -29,16 +21,8 @@ st.set_page_config(
     layout="centered"
 )
 
-def load_user_data(user):
-    file_path = USER_DIR / f"{user}.json"
-    try:
-        with open(file_path, "r") as f:
-            return f.read()
-    except:
-        return {}
-
 # Title
-st.title("Goal Setting Advisor")
+st.title("Explore Path Advisor")
 
 # Sidebar for API key input
 with st.sidebar:
@@ -62,84 +46,38 @@ with st.sidebar:
         index=0
     )
 
+    user_data = load_user_file(user)
+
     # Clear chat button in sidebar
     if st.button("🗑️ Clear Chat"):
-        st.session_state.messages = [{"role": "system", "content": f"Today's Date: {date.today()}. Here is the user's information: {load_user_data(user)}"},
-                                     {"role": "assistant", "content": "What goal do you have in mind?"}]
+        st.session_state.messages = [{"role": "system", "content": f"Here is the user's information: {user_data}"}]
         st.rerun()
-    
-# Initialize session state for messages and response_id
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": f"Today's Date: {date.today()}. Here is the user's information: {load_user_data(user)}"},
-                                     {"role": "assistant", "content": "What goal do you have in mind?"}]
 
-# Display chat messages
-for message in st.session_state.messages:
-    if message["role"] == "system":
-        continue
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+if "explore_paths_messages" not in st.session_state:
+    st.session_state.explore_paths_messages = [{"role": "system", "content": f"Today's Date: {date.today()}."},
+                                               {"role": "system", "content": f"Here is the user's information: {json.dumps(user_data)}"}]
 
-# User input
-user_input = st.chat_input("Type your message here...")
+# Run button to generate future paths
+if st.button("Generate Future Paths"):
+    client = OpenAI(api_key=API_KEY)
 
-# Handle user input and generate response
-if user_input:
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    
-    # Display user message
-    with st.chat_message("user"):
-        st.write(user_input)
-    
-    # Generate AI response  
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            # Prepare messages for OpenAI API
-            client = OpenAI(api_key = API_KEY)
-            response = client.responses.create(
-                model=model,
-                input=st.session_state.messages,
-                instructions= """
-                               ### Role
-                               You are Finario, a friendly and professional financial advisor.
-                               Your task is to help users set financial goals effectively.
-
-                               ### Tasks
-                               You will only do a predefined set of tasks. When a user asks for something outside these tasks,
-                               politely inform them that you can only assist with the predefined tasks.
-                               Your predefined tasks are:
-                               1. Help users define and set financial goals one at a time, ensuring that they have established a target amount and a deadline.
-
-                               ### Restrictions
-                               1. You do not initiate in creating a savings plan.
-
-                               ### Context
-                               Default currency is Philippine Pesos.
-                               Once the user has set a goal, encourage them to click "Save Goal" if they do not have any more suggestions.
-
-                               ### Tone
-                               Your tone should be friendly, professional, and supportive. You respond with a maximum of 3 sentences.
-                               """
-            )
-
-            # Add AI response to chat history
-            st.session_state.messages.append({"role": "assistant", "content": response.output_text})
-
-            # Show the goal new information
-            st.session_state.new_goal_info = client.responses.parse(
-                model="gpt-4.1-nano-2025-04-14",
-                input=st.session_state.messages,
-                instructions="""
-                                Save the user's goal as a Goal class in JSON format.
-                                If the input is incompatible with certain fields, set those fields to None or empty list as appropriate.
-                             """,
-                text_format=Goal
-            )
-
-            st.write(st.session_state.new_goal_info.output_parsed)
-            st.write(response.output_text)
-
-if st.button("Save Goal", icon="✅", type="secondary"):
-    add_goal(user, st.session_state.new_goal_info.output_parsed)
-    st.write("Saved!")
+    for col in st.columns(3):
+        response = client.responses.parse(
+            model=model,
+            input=st.session_state.explore_paths_messages,
+            instructions=
+            """
+            ### Role
+            You are an expert financial advisor specializing in creating personalized financial plans that help users achieve their goals.
+            ### Task
+            Develop a distinct future financial paths for the user based on their profile and goals. Each should include a detailed saving plan.
+            ### Context
+            The currency is in Philippine pesos, unless stated otherwise.
+            """,
+            tools = [{
+                "type": "code_interpreter",
+                "container": {"type": "auto"}
+            }],
+        )
+        st.session_state.explore_paths_messages.append({"role": "assistant", "content": response.output_text})
+        col.write(response.output_text)

@@ -14,6 +14,19 @@
             "created_at": "2025-09-15",
             "notes": "Saving for a car in 100 days.",
             "current_balance": 0.0
+        },
+        {
+            "id": "1ed58e3a-137d-4f6e-ad65-f6c88d5f7303",
+            "name": "Having a Baby",
+            "total_target_amount": 100000.0,
+            "deadline": "2026-09-16",
+            "saving_plan": [],
+            "status": "On Track",
+            "flexibility": "Adjustable",
+            "priority": "High",
+            "created_at": "2025-09-16",
+            "notes": "Save PHP 100,000 by next year for expenses related to having a baby.",
+            "current_balance": 0.0
         }
     ]
 }

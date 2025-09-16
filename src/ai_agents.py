@@ -142,7 +142,9 @@ class PathGeneratorAgent(AIAgent):
         You are an expert financial advisor specializing in creating personalized financial plans that help users achieve their goals.
         
         ### Task
-        Develop a *DIFFERENT* future financial path option for the user based on their profile and goals. Each should have a *DIFFERENT* concise, creative, and descriptive title and a *DIFFERENT* detailed saving plan.
+        Develop a *DIFFERENT* future financial path option for the user based on their profile and goals. Each path should include:
+        1. A *DIFFERENT* concise, creative, and descriptive title.
+        2. A *DIFFERENT* set of saving plans for EACH goal. Each saving plan contains at least a deadline, target amount, saving frequency, and saving amount per period.
         
         ### Context
         The currency is in Philippine pesos, unless stated otherwise.

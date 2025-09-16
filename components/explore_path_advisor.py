@@ -1,9 +1,6 @@
 import sys
-from openai import OpenAI
 from datetime import date
 from pathlib import Path
-from pydantic import BaseModel, Field, computed_field
-from typing import List, Optional, Literal
 import json
 
 import streamlit as st
@@ -11,8 +8,7 @@ import streamlit as st
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
-from src.config import USER_DIR
-from src.json_utils import load_user_file, Timeline
+from src.json_utils import load_user_file
 from src.chat_utils import ChatManagement
 from src.ai_agents import PathGeneratorAgent
 

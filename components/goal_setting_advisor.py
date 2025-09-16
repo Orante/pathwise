@@ -1,6 +1,6 @@
 import sys
 from openai import OpenAI
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import streamlit as st
@@ -9,7 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from src.config import USER_DIR
-from src.json_utils import add_goal
+from src.json_utils import add_goal, load_user_file
 from src.chat_utils import ChatManagement
 from src.ai_agents import GoalSettingAgent
 
@@ -47,8 +47,39 @@ with st.sidebar:
         index=0
     )
 
+    user_data = load_user_file(user)
+    
+    st.header(f"{user_data.get('name', user)}'s Goals")
+
+    for goal in user_data["goals"]:
+        # Calculate progress percentage
+        current = goal.get("current_balance", 0.0)
+        target = goal.get("total_target_amount", 1)
+        progress = min(current / target, 1.0) * 100
+
+        # Deadline formatting
+        deadline = datetime.strptime(goal["deadline"], "%Y-%m-%d").strftime("%b %d, %Y")
+
+        # Color based on status
+        status_color = {
+            "On Track": "green",
+            "At Risk": "orange",
+            "Off Track": "red"
+        }.get(goal["status"], "gray")
+
+        with st.expander(f"{goal['name']} ({goal['status']})"):
+            st.markdown(f"**Target:** PHP {target:,.2f}")
+            st.markdown(f"**Current Balance:** PHP {current:,.2f}")
+            st.progress(progress / 100)
+            st.markdown(f"**Deadline:** {deadline}")
+            st.markdown(f"**Flexibility:** {goal.get('flexibility', 'N/A')}")
+            st.markdown(f"**Priority:** {goal.get('priority', 'N/A')}")
+            if goal.get("notes"):
+                st.markdown(f"**Notes:** {goal['notes']}")
+            st.markdown("---")
+
     # Clear chat button in sidebar
-    if st.button("🗑️ Clear Chat"):
+    if st.button("Reset"):
         goals_chat.clear()
         st.session_state.new_goal_info = None
         st.rerun()

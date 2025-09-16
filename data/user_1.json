@@ -1,6 +1,6 @@
 {
     "user_id": "user_1",
-    "name": "",
+    "name": "Dallin",
     "goals": [
         {
             "id": "948dc238-3088-4ee9-9158-d62a7370ad11",
@@ -52,6 +52,19 @@
             "priority": "High",
             "created_at": "2023-10-05",
             "notes": "",
+            "current_balance": 0.0
+        },
+        {
+            "id": "c609e123-8038-4060-bf6a-406dcc5e29d2",
+            "name": "Wedding in 3 months",
+            "total_target_amount": 50000.0,
+            "deadline": "2025-12-16",
+            "saving_plan": [],
+            "status": "On Track",
+            "flexibility": "Firm",
+            "priority": "High",
+            "created_at": "2025-09-16",
+            "notes": "Savings goal for wedding in 3 months.",
             "current_balance": 0.0
         }
     ]
